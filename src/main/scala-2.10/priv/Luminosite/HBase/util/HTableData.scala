@@ -1,6 +1,7 @@
 package priv.Luminosite.HBase.util
 
 import org.apache.hadoop.hbase.client.{ResultScanner, Result, Get, Put}
+import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -14,7 +15,16 @@ case class HTableData(row:Array[Byte],
                  timestamp:Long,
                  value:Array[Byte]) {
 
-
+  def rowValue = Bytes.toString(row)
+  def familyValue = Bytes.toString(family)
+  def qualifierValue = Bytes.toString(qualifier)
+  def getValue = {
+    if (value.length == 8) {
+      Bytes.toLong(value).toString
+    } else {
+      Bytes.toString(value)
+    }
+  }
 
 }
 

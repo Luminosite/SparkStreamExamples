@@ -52,7 +52,12 @@ class KafkaStreamExample {
       val scan = new Scan()
       scan.addFamily(KafkaStreamExample.tableFamilyValue)
       val result = hBaseConn.scan(scan)
-      val resultList = HTableData.getResults(result)
+      val resultList = HTableData.getTableData(result)
+
+      println("---------")
+      resultList.foreach(data=>{
+        println(data.rowValue+":"+data.getValue)
+      })
 
     })
 
