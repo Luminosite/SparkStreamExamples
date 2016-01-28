@@ -2,12 +2,12 @@ name := "SparkStreamExamples"
 
 version := "1.0"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.10.6"
 
 val hbaseVersion = "0.98.4-hadoop2"
 val hadoopVersion = "2.4.0"
 
-//libraryDependencies += "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.6.0"
+libraryDependencies += "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.6.0"
 libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.6.0"
 //libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 //libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion
