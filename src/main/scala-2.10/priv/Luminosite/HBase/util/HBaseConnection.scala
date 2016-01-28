@@ -1,7 +1,7 @@
 package priv.Luminosite.HBase.util
 
 import org.apache.hadoop.hbase.{HColumnDescriptor, TableName, HTableDescriptor, HBaseConfiguration}
-import org.apache.hadoop.hbase.client.{Put, HBaseAdmin, HTable}
+import org.apache.hadoop.hbase.client._
 
 /**
   * Created by kufu on 28/01/2016.
@@ -31,6 +31,10 @@ class HBaseConnection(tableName:String, zookeeper:String, families:List[String])
   def put(put:Put): Unit ={
     if(table==null) throw new Exception("Open or create a table first.")
     table.put(put)
+  }
+
+  def scan(s:Scan): ResultScanner = {
+    table.getScanner(s)
   }
 
   def close(): Unit ={

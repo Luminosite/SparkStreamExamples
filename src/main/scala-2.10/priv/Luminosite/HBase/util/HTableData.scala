@@ -1,6 +1,6 @@
 package priv.Luminosite.HBase.util
 
-import org.apache.hadoop.hbase.client.{Result, Get, Put}
+import org.apache.hadoop.hbase.client.{ResultScanner, Result, Get, Put}
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
@@ -30,17 +30,27 @@ object HTableData{
     val retData: ListBuffer[HTableData] = new ListBuffer[HTableData]
     val row: Array[Byte] = result.getRow
     val familyMap = result.getMap
-    for (family <- familyMap.keySet) {
-      for (qualifier <- familyMap.get(family).keySet) {
-        import scala.collection.JavaConversions._
-        for (l <- familyMap.get(family).get(qualifier).navigableKeySet) {
-          val value: Array[Byte] = familyMap.get(family).get(qualifier).get(l)
-          val data: HTableData = new HTableData(row, family, qualifier, l, value)
+    familyMap.keySet.foreach(family=>{
+      val qualifiers = familyMap.get(family)
+      qualifiers.keySet.foreach(qualifier=>{
+        val versions = qualifiers.get(qualifier)
+        versions.navigableKeySet.foreach(timestamp=>{
+          val value: Array[Byte] = versions.get(timestamp)
+          val data: HTableData = new HTableData(row, family, qualifier, timestamp, value)
           retData.add(data)
-        }
-      }
-    }
+        })
+      })
+    })
     retData.toList
+  }
+  def getTableData(result: ResultScanner): List[HTableData] = {
+    val retList = new ListBuffer[HTableData]
+    val iterator = result.iterator()
+    while(iterator.hasNext){
+      val result = iterator.next()
+      retList++=getTableData(result)
+    }
+    retList.toList
   }
 
   def genGet(data: HTableData): Get = {

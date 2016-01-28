@@ -1,10 +1,13 @@
 package priv.Luminosite.KafkaStreamExampe
 
 import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.hadoop.hbase.client.Scan
+import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapred.JobConf
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import priv.Luminosite.HBase.util.{HTableData, HBaseConnection}
 import priv.Luminosite.KafkaStreamExampe.OutputComponent.{ExampleDataTransfer, TableIncrementFormat}
 
 /**
@@ -42,7 +45,14 @@ class KafkaStreamExample {
         KafkaStreamExample.tableFamily, KafkaStreamExample.tableQualifier))
         .saveAsHadoopDataset(jobConf)
 
+      val hBaseConn = new HBaseConnection(KafkaStreamExample.rawDataTable,
+        KafkaStreamExample.zookeeper, List(KafkaStreamExample.tableFamily))
+      hBaseConn.openOrCreateTable()
 
+      val scan = new Scan()
+      scan.addFamily(KafkaStreamExample.tableFamilyValue)
+      val result = hBaseConn.scan(scan)
+      val resultList = HTableData.getResults(result)
 
     })
 
@@ -53,7 +63,10 @@ class KafkaStreamExample {
 }
 
 object KafkaStreamExample{
+  val zookeeper = "localhost:2181"
   val rawDataTable = "MyTestTable"
   val tableFamily = "f1"
   val tableQualifier = "c1"
+
+  def tableFamilyValue = Bytes.toBytes(tableFamily)
 }
