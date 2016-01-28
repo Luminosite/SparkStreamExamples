@@ -1,7 +1,7 @@
 package priv.Luminosite.KafkaStreamExampe
 
 /**
-  * Created by kufu on 16-1-28.
+  * Created by kufu on 28/1/16.
   */
 class KafkaStreamExample {
 

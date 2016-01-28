@@ -3,7 +3,7 @@ package priv.Luminosite.SmallDemo
 import org.apache.spark.{SparkContext, SparkConf}
 
 /**
-  * Created by kufu on 16-1-27.
+  * Created by kufu on 27/1/16.
   */
 object SparkDemo {
   def main(args: Array[String]) {
@@ -13,7 +13,6 @@ object SparkDemo {
       .setExecutorEnv("spark.executor.extraClassPath","target/scala-2.11/sparkstreamexamples_2.11-1.0.jar")
 
     val sc = new SparkContext(conf)
-
     val list = List("a a a b", "c d e d")
 
     val wordCount = sc.makeRDD(list).flatMap(_.split(" ")).map(word => (word, 1)).reduceByKey(_+_)

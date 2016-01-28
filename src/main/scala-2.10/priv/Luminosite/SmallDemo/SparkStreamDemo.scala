@@ -5,7 +5,7 @@ import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
-  * Created by kufu on 16-1-28.
+  * Created by kufu on 28/1/16.
   */
 object SparkStreamDemo {
   def main(args: Array[String]) {
