@@ -1,7 +1,6 @@
 package priv.Luminosite.KafkaStreamExampe
 
 import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.mapred.TableOutputFormat
 import org.apache.hadoop.mapred.JobConf
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
@@ -14,7 +13,6 @@ import priv.Luminosite.KafkaStreamExampe.OutputComponent.{ExampleDataTransfer, T
 class KafkaStreamExample {
 
   def run(): Unit ={
-    val rawDataTable = "MyTestTable"
 
     val conf = new SparkConf()
     conf.setMaster("local[2]").setAppName("KafkaStreamExample")
@@ -29,10 +27,10 @@ class KafkaStreamExample {
 
 
     val hbaseConf = HBaseConfiguration.create()
-    conf.set(TableIncrementFormat.OUTPUT_TABLE, rawDataTable)
+    conf.set(TableIncrementFormat.OUTPUT_TABLE, KafkaStreamExample.rawDataTable)
     val jobConf:JobConf = new JobConf(hbaseConf, this.getClass)
     jobConf.setOutputFormat(classOf[TableIncrementFormat])
-    jobConf.set(TableIncrementFormat.OUTPUT_TABLE, rawDataTable)
+    jobConf.set(TableIncrementFormat.OUTPUT_TABLE, KafkaStreamExample.rawDataTable)
 
     wordCounts.foreachRDD(rdd=>{
       println("--------- a rdd: ----------")
@@ -40,12 +38,11 @@ class KafkaStreamExample {
         println(tuple._1+":"+tuple._2)
       })
 
-      val tableFamily = "f1"
-      val tableQualifier = "c1"
-      rdd.map(ExampleDataTransfer.IncrementTranslation(tableFamily, tableQualifier))
+      rdd.map(ExampleDataTransfer.IncrementTranslation(
+        KafkaStreamExample.tableFamily, KafkaStreamExample.tableQualifier))
         .saveAsHadoopDataset(jobConf)
 
-      
+
 
     })
 
@@ -53,4 +50,10 @@ class KafkaStreamExample {
     ssc.awaitTermination()
   }
 
+}
+
+object KafkaStreamExample{
+  val rawDataTable = "MyTestTable"
+  val tableFamily = "f1"
+  val tableQualifier = "c1"
 }
