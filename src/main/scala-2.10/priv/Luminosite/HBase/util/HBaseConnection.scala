@@ -7,6 +7,8 @@ import org.apache.hadoop.hbase.client.{Put, HBaseAdmin, HTable}
   * Created by kufu on 28/01/2016.
   */
 class HBaseConnection(tableName:String, zookeeper:String, families:List[String]) {
+
+
   var table:HTable = null
 
   def openOrCreateTable(): Unit ={
@@ -16,7 +18,7 @@ class HBaseConnection(tableName:String, zookeeper:String, families:List[String])
     try{
       admin = new HBaseAdmin(config)
       if(!admin.tableExists(tableName)){
-        val descriptor = new HTableDescriptor(new TableName(tableName))
+        val descriptor = new HTableDescriptor(TableName.valueOf(tableName))
         families.foreach(family=>descriptor.addFamily(new HColumnDescriptor(family)))
         admin.createTable(descriptor)
       }
