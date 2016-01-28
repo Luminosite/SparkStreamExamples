@@ -13,8 +13,7 @@ object SparkDemo {
       .setExecutorEnv("spark.executor.extraClassPath","target/scala-2.11/sparkstreamexamples_2.11-1.0.jar")
 
     val sc = new SparkContext(conf)
-//    val sc = new SparkContext("local[2]", "SparkDemo", "/home/kufu/spark/spark-1.5.2-bin-hadoop2.6",
-//      List("target/scala-2.11/sparkstreamexamples_2.11-1.0.jar"))
+
     val list = List("a a a b", "c d e d")
 
     val wordCount = sc.makeRDD(list).flatMap(_.split(" ")).map(word => (word, 1)).reduceByKey(_+_)
