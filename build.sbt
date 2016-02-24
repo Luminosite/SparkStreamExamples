@@ -11,6 +11,7 @@ val hadoopVersion = "2.4.0"
 libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.6.0"
 libraryDependencies += "org.apache.spark" % "spark-streaming_2.10" % "1.6.0"
 libraryDependencies += "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.6.0"
+libraryDependencies += "org.apache.kafka" % "kafka-clients" % "0.9.0.0"
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion excludeAll
   ExclusionRule(organization="javax.servlet")
 libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion

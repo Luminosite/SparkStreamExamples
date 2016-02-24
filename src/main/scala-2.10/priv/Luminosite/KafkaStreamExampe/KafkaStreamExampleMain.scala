@@ -5,6 +5,8 @@ package priv.Luminosite.KafkaStreamExampe
   */
 object KafkaStreamExampleMain {
   def main(args: Array[String]) {
-    new KafkaStreamExample().run()
+    val publishTopic = "publish"
+    val publishBrokers = "localhost:9094" :: Nil
+    new KafkaStreamExample().run(publishTopic, publishBrokers)
   }
 }

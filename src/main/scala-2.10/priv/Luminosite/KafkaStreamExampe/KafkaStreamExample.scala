@@ -8,14 +8,14 @@ import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import priv.Luminosite.HBase.util.{HTableData, HBaseConnection}
-import priv.Luminosite.KafkaStreamExampe.OutputComponent.{ExampleDataTransfer, TableIncrementFormat}
+import priv.Luminosite.KafkaStreamExampe.OutputComponent.{SimpleKafkaProducer, ExampleDataTransfer, TableIncrementFormat}
 
 /**
   * Created by kufu on 28/1/16.
   */
 class KafkaStreamExample {
 
-  def run(): Unit ={
+  def run(publishTopic:String, publishers:List[String]): Unit ={
 
     val conf = new SparkConf()
     conf.setMaster("local[2]").setAppName("KafkaStreamExample")
@@ -27,7 +27,6 @@ class KafkaStreamExample {
     val topicMap = Map("myTopic"->3)
     val wordCounts = KafkaUtils.createStream(ssc, "localhost:2181", "testKafkaGroupId", topicMap)
       .flatMap(_._2.split(" ")).map((_, 1)).reduceByKey(_+_)
-
 
     val hbaseConf = HBaseConfiguration.create()
     conf.set(TableIncrementFormat.OUTPUT_TABLE, KafkaStreamExample.rawDataTable)
@@ -54,10 +53,26 @@ class KafkaStreamExample {
       val result = hBaseConn.scan(scan)
       val resultList = HTableData.getTableData(result)
 
-      println("---------")
+      val brokerString = {
+        val stringBuilder = new StringBuilder
+        publishers.foreach(str=>{
+          if(stringBuilder.nonEmpty){
+            stringBuilder++=","
+          }
+          stringBuilder++=str
+        })
+        stringBuilder.toString()
+      }
+      val simpleProducer = new SimpleKafkaProducer(brokerString, publishTopic)
+//      println("---------")
+      simpleProducer.sendMessage("--------------------")
+      println("results:"+resultList.size)
       resultList.foreach(data=>{
-        println(data.rowValue+":"+data.getValue)
+        val message = data.rowValue+":"+data.getValue
+        println("published message:"+data.rowValue+":"+data.getValue)
+        simpleProducer.sendMessage(message)
       })
+      simpleProducer.close()
 
     })
 
