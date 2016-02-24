@@ -1,10 +1,13 @@
 package priv.Luminosite.KafkaStreamExampe
 
+import kafka.serializer.StringDecoder
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapred.JobConf
 import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import priv.Luminosite.HBase.util.{HTableData, HBaseConnection}
@@ -15,7 +18,7 @@ import priv.Luminosite.KafkaStreamExampe.OutputComponent.{SimpleKafkaProducer, E
   */
 class KafkaStreamExample {
 
-  def run(publishTopic:String, publishers:List[String]): Unit ={
+  def run(approachType:Int, consumeTopic:String, zkOrBrokers:String, publishTopic:String, publishers:List[String]): Unit ={
 
     val conf = new SparkConf()
     conf.setMaster("local[2]").setAppName("KafkaStreamExample")
@@ -23,10 +26,18 @@ class KafkaStreamExample {
       .setExecutorEnv("spark.executor.extraClassPath","target/scala-2.11/sparkstreamexamples_2.11-1.0.jar")
 
     val ssc = new StreamingContext(conf, Seconds(2))
+    val topicMap = Map(consumeTopic->3)
 
-    val topicMap = Map("myTopic"->3)
-    val wordCounts = KafkaUtils.createStream(ssc, "localhost:2181", "testKafkaGroupId", topicMap)
-      .flatMap(_._2.split(" ")).map((_, 1)).reduceByKey(_+_)
+    val dataRDD:InputDStream[(String, String)] = approachType match {
+      case KafkaStreamExample.ReceiverBasedApproach =>
+        KafkaUtils.createStream(ssc, zkOrBrokers, "testKafkaGroupId", topicMap)
+      case KafkaStreamExample.DirectApproach =>
+        KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
+          ssc, Map[String, String]("metadata.broker.list" -> zkOrBrokers),
+          Set[String](consumeTopic))
+    }
+
+    val wordCounts = dataRDD.flatMap(_._2.split(" ")).map((_, 1)).reduceByKey(_+_)
 
     val hbaseConf = HBaseConfiguration.create()
     conf.set(TableIncrementFormat.OUTPUT_TABLE, KafkaStreamExample.rawDataTable)
@@ -34,10 +45,17 @@ class KafkaStreamExample {
     jobConf.setOutputFormat(classOf[TableIncrementFormat])
     jobConf.set(TableIncrementFormat.OUTPUT_TABLE, KafkaStreamExample.rawDataTable)
 
-    wordCounts.foreachRDD(rdd=>{
+    wordCounts.foreachRDD(genProcessing(publishTopic, publishers, jobConf))
+
+    ssc.start()
+    ssc.awaitTermination()
+  }
+
+  def genProcessing(publishTopic:String, publishers:List[String], jobConf:JobConf):(RDD[(String, Int)])=>Unit = {
+    def eachRDDProcessing(rdd:RDD[(String, Int)]):Unit = {
       println("--------- a rdd: ----------")
-      rdd.foreach(tuple=>{
-        println(tuple._1+":"+tuple._2)
+      rdd.foreach(tuple => {
+        println(tuple._1 + ":" + tuple._2)
       })
 
       rdd.map(ExampleDataTransfer.IncrementTranslation(
@@ -55,31 +73,27 @@ class KafkaStreamExample {
 
       val brokerString = {
         val stringBuilder = new StringBuilder
-        publishers.foreach(str=>{
-          if(stringBuilder.nonEmpty){
-            stringBuilder++=","
+        publishers.foreach(str => {
+          if (stringBuilder.nonEmpty) {
+            stringBuilder ++= ","
           }
-          stringBuilder++=str
+          stringBuilder ++= str
         })
         stringBuilder.toString()
       }
       val simpleProducer = new SimpleKafkaProducer(brokerString, publishTopic)
-//      println("---------")
+      //      println("---------")
       simpleProducer.sendMessage("--------------------")
-      println("results:"+resultList.size)
-      resultList.foreach(data=>{
-        val message = data.rowValue+":"+data.getValue
-        println("published message:"+data.rowValue+":"+data.getValue)
+//      println("results:" + resultList.size)
+      resultList.foreach(data => {
+        val message = data.rowValue + ":" + data.getValue
+//        println("published message:" + data.rowValue + ":" + data.getValue)
         simpleProducer.sendMessage(message)
       })
       simpleProducer.close()
-
-    })
-
-    ssc.start()
-    ssc.awaitTermination()
+    }
+    eachRDDProcessing
   }
-
 }
 
 object KafkaStreamExample{
@@ -87,6 +101,9 @@ object KafkaStreamExample{
   val rawDataTable = "MyTestTable"
   val tableFamily = "f1"
   val tableQualifier = "c1"
+
+  val ReceiverBasedApproach = 0
+  val DirectApproach = 1
 
   def tableFamilyValue = Bytes.toBytes(tableFamily)
 }

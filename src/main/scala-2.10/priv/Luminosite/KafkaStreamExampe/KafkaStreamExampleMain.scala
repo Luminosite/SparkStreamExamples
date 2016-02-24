@@ -6,7 +6,13 @@ package priv.Luminosite.KafkaStreamExampe
 object KafkaStreamExampleMain {
   def main(args: Array[String]) {
     val publishTopic = "publish"
-    val publishBrokers = "localhost:9094" :: Nil
-    new KafkaStreamExample().run(publishTopic, publishBrokers)
+    val publishBrokers = "localhost:9095" :: Nil
+    val consumeTopic = "myTopic"
+    val consumeZookeeper = "localhost:2181"
+    val consumeBroker = "localhost:9095"
+//    new KafkaStreamExample().run(KafkaStreamExample.ReceiverBasedApproach,
+//      consumeTopic, consumeZookeeper, publishTopic, publishBrokers)
+    new KafkaStreamExample().run(KafkaStreamExample.DirectApproach,
+      consumeTopic, consumeBroker, publishTopic, publishBrokers)
   }
 }
