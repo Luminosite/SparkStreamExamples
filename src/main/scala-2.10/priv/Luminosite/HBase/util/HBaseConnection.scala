@@ -6,8 +6,7 @@ import org.apache.hadoop.hbase.client._
 /**
   * Created by kufu on 28/01/2016.
   */
-class HBaseConnection(tableName:String, zookeeper:String, families:List[String]) {
-
+class HBaseConnection (tableName:String, zookeeper:String, families:List[String]) {
 
   var table:HTable = null
 
@@ -31,6 +30,17 @@ class HBaseConnection(tableName:String, zookeeper:String, families:List[String])
   def put(put:Put): Unit ={
     if(table==null) throw new Exception("Open or create a table first.")
     table.put(put)
+  }
+
+  def puts(puts: java.util.List[Put]): Unit = {
+    if(table==null) throw new Exception("Open or create a table first.")
+    table.put(puts)
+  }
+
+  def delete(deletes: List[Delete]) = {
+    val list = new java.util.ArrayList[Delete]()
+    deletes.foreach(list.add)
+    table.delete(list)
   }
 
   def scan(s:Scan): ResultScanner = {

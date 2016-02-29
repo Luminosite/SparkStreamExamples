@@ -1,6 +1,6 @@
 package priv.Luminosite.HBase.util
 
-import org.apache.hadoop.hbase.client.{ResultScanner, Result, Get, Put}
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.mutable.ListBuffer
@@ -67,5 +67,19 @@ object HTableData{
     val get: Get = new Get(data.row)
     get.addColumn(data.family, data.qualifier)
     get
+  }
+
+  def genDelete(data: HTableData): Delete = {
+    val del = new Delete(data.row)
+    del.deleteColumns(data.family, data.qualifier)
+    del
+  }
+
+  def genDeletes(datum:List[HTableData]): List[Delete] = {
+    val ret = new ListBuffer[Delete]
+    datum.foreach(data=>{
+      ret+=genDelete(data)
+    })
+    ret.toList
   }
 }
