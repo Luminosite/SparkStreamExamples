@@ -18,23 +18,29 @@ class KafkaStreamJob{
   def run(approachType:Int, consumeTopic:String, zkOrBrokers:String, publishTopic:String, publishers:List[String]): Unit ={
 
     val conf = new SparkConf()
-    conf.setMaster("local[2]").setAppName("KafkaStreamExample")
+    conf.setMaster("local[*]").setAppName("KafkaStreamExample")
       .setSparkHome("/home/kufu/spark/spark-1.5.2-bin-hadoop2.6")
       .setExecutorEnv("spark.executor.extraClassPath","target/scala-2.11/sparkstreamexamples_2.11-1.0.jar")
 //      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
-    val ssc = new StreamingContext(conf, Seconds(2))
-    val topicMap = Map(consumeTopic->3)
+    val threadNum = 3
 
-    val dataRDD:InputDStream[(String, String)] = approachType match {
+    val ssc = new StreamingContext(conf, Seconds(2))
+    val topicMap = Map(consumeTopic -> 1)
+
+    val dataRDDs:IndexedSeq[InputDStream[(String, String)]] = approachType match {
       case KafkaStreamJob.ReceiverBasedApproach =>
-        KafkaUtils.createStream(ssc, zkOrBrokers, "testKafkaGroupId", topicMap)
+        (1 to threadNum).map(_=>
+          KafkaUtils.createStream(ssc, zkOrBrokers, "testKafkaGroupId", topicMap))
       case KafkaStreamJob.DirectApproach =>
-        KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
-          ssc, Map[String, String]("metadata.broker.list" -> zkOrBrokers),
-          Set[String](consumeTopic))
+        (1 to threadNum).map(_=>
+          KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
+            ssc, Map[String, String]("metadata.broker.list" -> zkOrBrokers),
+          Set[String](consumeTopic)))
     }
 
+    //dataRDDs.foreach(_.foreachRDD(genProcessing(approachType)))
+    val dataRDD = ssc.union(dataRDDs)
     dataRDD.foreachRDD(genProcessing(approachType))
 
     ssc.start()
@@ -53,7 +59,7 @@ class KafkaStreamJob{
       val batchNum = count
       val curTime = System.currentTimeMillis()
 
-      Thread.sleep(10000)
+      Thread.sleep(5000)
 
       val family = approachType match{
         case KafkaStreamJob.DirectApproach => KafkaStreamJob.DirectFamily
