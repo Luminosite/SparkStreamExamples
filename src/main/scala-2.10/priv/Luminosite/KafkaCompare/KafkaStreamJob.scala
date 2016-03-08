@@ -5,7 +5,7 @@ import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.dstream.InputDStream
+import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import priv.Luminosite.HBase.util.HBaseConnection
@@ -13,34 +13,35 @@ import priv.Luminosite.HBase.util.HBaseConnection
 /**
   * Created by kufu on 29/02/2016.
   */
-class KafkaStreamJob{
+class KafkaStreamJob extends Serializable{
 
   def run(approachType:Int, consumeTopic:String, zkOrBrokers:String, publishTopic:String, publishers:List[String]): Unit ={
 
     val conf = new SparkConf()
-    conf.setMaster("local[*]").setAppName("KafkaStreamExample")
+    conf.setMaster("local[8]").setAppName("KafkaStreamExample")
       .setSparkHome("/home/kufu/spark/spark-1.5.2-bin-hadoop2.6")
       .setExecutorEnv("spark.executor.extraClassPath","target/scala-2.11/sparkstreamexamples_2.11-1.0.jar")
 //      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .set("spark.executor.cores","3")
 
     val threadNum = 3
 
     val ssc = new StreamingContext(conf, Seconds(2))
+
+    ssc.checkpoint("checkpoint")
+
     val topicMap = Map(consumeTopic -> 1)
 
-    val dataRDDs:IndexedSeq[InputDStream[(String, String)]] = approachType match {
+    val dataRDD:DStream[(String, String)] = approachType match {
       case KafkaStreamJob.ReceiverBasedApproach =>
-        (1 to threadNum).map(_=>
+        val dataRDDs:IndexedSeq[InputDStream[(String, String)]] = (1 to threadNum).map(i=>
           KafkaUtils.createStream(ssc, zkOrBrokers, "testKafkaGroupId", topicMap))
+        ssc.union(dataRDDs)
       case KafkaStreamJob.DirectApproach =>
-        (1 to threadNum).map(_=>
           KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
-            ssc, Map[String, String]("metadata.broker.list" -> zkOrBrokers),
-          Set[String](consumeTopic)))
+            ssc, Map("metadata.broker.list" -> zkOrBrokers), Set[String](consumeTopic))
     }
 
-    //dataRDDs.foreach(_.foreachRDD(genProcessing(approachType)))
-    val dataRDD = ssc.union(dataRDDs)
     dataRDD.foreachRDD(genProcessing(approachType))
 
     ssc.start()
@@ -53,7 +54,7 @@ class KafkaStreamJob{
   def genProcessing(approachType:Int):(RDD[(String, String)])=>Unit = {
 
     def eachRDDProcessing(rdd:RDD[(String, String)]):Unit = {
-      if(count>max) throw new Exception("Stop here")
+//      if(count>max) throw new Exception("Stop here")
       println("--------- num: "+count+" ---------")
 
       val batchNum = count
@@ -73,6 +74,7 @@ class KafkaStreamJob{
       val messageCount = rdd.count()
 
       rdd.foreach(tuple => {
+        println(tuple._2)
         val hBaseConn = new HBaseConnection(KafkaStreamJob.rawDataTable,
           KafkaStreamJob.zookeeper, families)
         hBaseConn.openOrCreateTable()
