@@ -14,7 +14,6 @@ libraryDependencies += "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.6.
 libraryDependencies += "org.apache.kafka" % "kafka-clients" % "0.9.0.0"
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion excludeAll
   ExclusionRule(organization="javax.servlet")
-libraryDependencies += "spark-streaming_kafka.2.1.0)"
 libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion
 libraryDependencies += "org.apache.hbase" % "hbase-server" % hbaseVersion
 
