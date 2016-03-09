@@ -1,0 +1,4 @@
+<runnerConfig>
+	<program>echo</program>
+	<command>echo 'a'</command>
+</runnerConfig>

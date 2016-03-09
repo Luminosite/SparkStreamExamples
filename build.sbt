@@ -31,3 +31,25 @@ resolvers ++= Seq(
   "PayPal Nexus snapshots" at "http://nexus.paypal.com/nexus/content/repositories/snapshots",
   "Artima Maven Repository" at "http://repo.artima.com/releases"
 )
+
+
+test in assembly := {}
+
+assemblyJarName in assembly := "KafkaApiComparison.jar"
+
+assemblyMergeStrategy in assembly := {
+  //  case PathList("org", "spark", xs @ _*) => MergeStrategy.last
+  case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
+  case PathList("org", "apache", "jasper", xs @ _*) => MergeStrategy.last
+  case PathList("org", "apache", "commons", "beanutils", xs @ _*) => MergeStrategy.last
+  case PathList("org", "apache", "commons", "collections", xs @ _*) => MergeStrategy.last
+  case PathList("org", "apache", "commons", "logging", xs @ _*) => MergeStrategy.last
+  case PathList("org", "apache", "hadoop", "yarn", xs @ _*) => MergeStrategy.last
+  case PathList("com", "google", "common", "base", xs @ _*) => MergeStrategy.last
+  case PathList("com", "esotericsoftware", "minlog", xs @ _*) => MergeStrategy.last
+  case PathList("javax", "servlet", xs @ _*) => MergeStrategy.last
+  case x => val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
+
+mainClass in assembly := Some("priv.Luminosite.KafkaCompare.KafkaCompareMain")
