@@ -12,8 +12,7 @@ libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.6.0"
 libraryDependencies += "org.apache.spark" % "spark-streaming_2.10" % "1.6.0"
 libraryDependencies += "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.6.0"
 libraryDependencies += "org.apache.kafka" % "kafka-clients" % "0.9.0.0"
-libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion excludeAll
-  ExclusionRule(organization="javax.servlet")
+libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion
 libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion
 libraryDependencies += "org.apache.hbase" % "hbase-server" % hbaseVersion
 
@@ -39,15 +38,15 @@ assemblyJarName in assembly := "KafkaApiComparison.jar"
 
 assemblyMergeStrategy in assembly := {
   //  case PathList("org", "spark", xs @ _*) => MergeStrategy.last
-  case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
-  case PathList("org", "apache", "jasper", xs @ _*) => MergeStrategy.last
-  case PathList("org", "apache", "commons", "beanutils", xs @ _*) => MergeStrategy.last
-  case PathList("org", "apache", "commons", "collections", xs @ _*) => MergeStrategy.last
-  case PathList("org", "apache", "commons", "logging", xs @ _*) => MergeStrategy.last
-  case PathList("org", "apache", "hadoop", "yarn", xs @ _*) => MergeStrategy.last
-  case PathList("com", "google", "common", "base", xs @ _*) => MergeStrategy.last
-  case PathList("com", "esotericsoftware", "minlog", xs @ _*) => MergeStrategy.last
-  case PathList("javax", "servlet", xs @ _*) => MergeStrategy.last
+  case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.first
+  case PathList("org", "apache", "jasper", xs @ _*) => MergeStrategy.first
+  case PathList("org", "apache", "commons", "beanutils", xs @ _*) => MergeStrategy.first
+  case PathList("org", "apache", "commons", "collections", xs @ _*) => MergeStrategy.first
+  case PathList("org", "apache", "commons", "logging", xs @ _*) => MergeStrategy.first
+  case PathList("org", "apache", "hadoop", "yarn", xs @ _*) => MergeStrategy.first
+  case PathList("com", "google", "common", "base", xs @ _*) => MergeStrategy.first
+  case PathList("com", "esotericsoftware", "minlog", xs @ _*) => MergeStrategy.first
+  case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
   case x => val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }

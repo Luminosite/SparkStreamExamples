@@ -6,7 +6,19 @@ package priv.Luminosite.KafkaCompare
 object KafkaCompareMain {
 
   def main(args: Array[String]) {
-    val flag = KafkaStreamJob.DirectApproach
+
+    var flag = KafkaStreamJob.DirectApproach
+
+    if(args.length>0){
+      if(args(0).equalsIgnoreCase("-d")){
+        flag = KafkaStreamJob.DirectApproach
+        println("using direct api")
+      }else if(args(0).equalsIgnoreCase("-r")){
+        flag = KafkaStreamJob.ReceiverBasedApproach
+        println("using receiver-based api")
+
+      }
+    }
 
     val publishTopic = "publish"
     val publishBrokers = "localhost:9092" :: Nil

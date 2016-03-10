@@ -24,14 +24,10 @@ class KafkaStreamJob extends Serializable{
     val conf = new SparkConf()
     conf.setMaster("local[8]").setAppName("KafkaStreamExample")
       .setSparkHome("/home/kufu/spark/spark-1.5.2-bin-hadoop2.6")
-//      .setExecutorEnv("spark.executor.extraClassPath","target/scala-2.10/sparkstreamexamples_2.11-1.0.jar")
-      //      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
     val threadNum = 3
 
     val ssc = new StreamingContext(conf, Seconds(2))
-
-    ssc.checkpoint(checkpointDir)
 
     val topicMap = Map(consumeTopic -> 1)
 
@@ -41,6 +37,7 @@ class KafkaStreamJob extends Serializable{
           KafkaUtils.createStream(ssc, zkOrBrokers, "testKafkaGroupId", topicMap))
         ssc.union(dataRDDs)
       case KafkaStreamJob.DirectApproach =>
+        ssc.checkpoint(checkpointDir)
         KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
           ssc, Map("metadata.broker.list" -> zkOrBrokers), Set[String](consumeTopic))
     }
@@ -66,14 +63,16 @@ class KafkaStreamJob extends Serializable{
     ssc.awaitTermination()
   }
 
+//  var n=0
   def genProcessing(approachType:Int):(RDD[(String, String)])=>Unit = {
 
     def eachRDDProcessing(rdd:RDD[(String, String)]):Unit = {
       println("--------- An RDD ---------")
 
-//      val curTime = System.currentTimeMillis()
-
-      Thread.sleep(3000)
+//      if(n==0){
+//        Thread.sleep(60000)
+//        n+=1
+//      }
 
       val family = approachType match{
         case KafkaStreamJob.DirectApproach => KafkaStreamJob.DirectFamily
