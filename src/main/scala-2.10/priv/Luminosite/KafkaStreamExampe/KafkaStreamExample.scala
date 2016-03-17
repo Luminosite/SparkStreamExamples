@@ -54,43 +54,45 @@ class KafkaStreamExample {
   def genProcessing(publishTopic:String, publishers:List[String], jobConf:JobConf):(RDD[(String, Int)])=>Unit = {
     def eachRDDProcessing(rdd:RDD[(String, Int)]):Unit = {
       println("--------- a rdd: ----------")
-      rdd.foreach(tuple => {
+      val newRdd = rdd.repartition(2)
+      newRdd.foreach(tuple => {
+        Thread.sleep(1500)
         println(tuple._1 + ":" + tuple._2)
       })
 
-      rdd.map(ExampleDataTransfer.IncrementTranslation(
-        KafkaStreamExample.tableFamily, KafkaStreamExample.tableQualifier))
-        .saveAsHadoopDataset(jobConf)
-
-      val hBaseConn = new HBaseConnection(KafkaStreamExample.rawDataTable,
-        KafkaStreamExample.zookeeper, List(KafkaStreamExample.tableFamily))
-      hBaseConn.openOrCreateTable()
-
-      val scan = new Scan()
-      scan.addFamily(KafkaStreamExample.tableFamilyValue)
-      val result = hBaseConn.scan(scan)
-      val resultList = HTableData.getTableData(result)
-
-      val brokerString = {
-        val stringBuilder = new StringBuilder
-        publishers.foreach(str => {
-          if (stringBuilder.nonEmpty) {
-            stringBuilder ++= ","
-          }
-          stringBuilder ++= str
-        })
-        stringBuilder.toString()
-      }
-      val simpleProducer = new SimpleKafkaProducer(brokerString, publishTopic)
-      //      println("---------")
-      simpleProducer.sendMessage("--------------------")
-//      println("results:" + resultList.size)
-      resultList.foreach(data => {
-        val message = data.rowValue + ":" + data.getValue
-//        println("published message:" + data.rowValue + ":" + data.getValue)
-        simpleProducer.sendMessage(message)
-      })
-      simpleProducer.close()
+//      rdd.map(ExampleDataTransfer.IncrementTranslation(
+//        KafkaStreamExample.tableFamily, KafkaStreamExample.tableQualifier))
+//        .saveAsHadoopDataset(jobConf)
+//
+//      val hBaseConn = new HBaseConnection(KafkaStreamExample.rawDataTable,
+//        KafkaStreamExample.zookeeper, List(KafkaStreamExample.tableFamily))
+//      hBaseConn.openOrCreateTable()
+//
+//      val scan = new Scan()
+//      scan.addFamily(KafkaStreamExample.tableFamilyValue)
+//      val result = hBaseConn.scan(scan)
+//      val resultList = HTableData.getTableData(result)
+//
+//      val brokerString = {
+//        val stringBuilder = new StringBuilder
+//        publishers.foreach(str => {
+//          if (stringBuilder.nonEmpty) {
+//            stringBuilder ++= ","
+//          }
+//          stringBuilder ++= str
+//        })
+//        stringBuilder.toString()
+//      }
+//      val simpleProducer = new SimpleKafkaProducer(brokerString, publishTopic)
+//      //      println("---------")
+//      simpleProducer.sendMessage("--------------------")
+////      println("results:" + resultList.size)
+//      resultList.foreach(data => {
+//        val message = data.rowValue + ":" + data.getValue
+////        println("published message:" + data.rowValue + ":" + data.getValue)
+//        simpleProducer.sendMessage(message)
+//      })
+//      simpleProducer.close()
     }
     eachRDDProcessing
   }

@@ -22,7 +22,8 @@ class KafkaStreamJob extends Serializable{
                    ): StreamingContext = {
     println("start a new context")
     val conf = new SparkConf()
-    conf.setMaster("local[8]").setAppName("KafkaStreamExample")
+    conf//.setMaster("spark://D-SHA-00436512:7077")
+      .setAppName("KafkaStreamExample")
       .setSparkHome("/home/kufu/spark/spark-1.5.2-bin-hadoop2.6")
 
     val threadNum = 3
@@ -69,11 +70,6 @@ class KafkaStreamJob extends Serializable{
     def eachRDDProcessing(rdd:RDD[(String, String)]):Unit = {
       println("--------- An RDD ---------")
 
-//      if(n==0){
-//        Thread.sleep(60000)
-//        n+=1
-//      }
-
       val family = approachType match{
         case KafkaStreamJob.DirectApproach => KafkaStreamJob.DirectFamily
         case KafkaStreamJob.ReceiverBasedApproach => KafkaStreamJob.NormalFamily
@@ -85,7 +81,10 @@ class KafkaStreamJob extends Serializable{
 
       val messageCount = rdd.count()
 
+//      val newRdd = rdd.repartition(2)
+
       rdd.foreach(tuple => {
+        Thread.sleep(1500)
         println(tuple._2)
         val hBaseConn = new HBaseConnection(KafkaStreamJob.rawDataTable,
           KafkaStreamJob.zookeeper, families)
