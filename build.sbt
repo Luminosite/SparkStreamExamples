@@ -16,6 +16,13 @@ libraryDependencies += "org.apache.hadoop" % "hadoop-client" % hadoopVersion exc
 libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion excludeAll ExclusionRule(organization="javax.servlet")
 libraryDependencies += "org.apache.hbase" % "hbase-server" % hbaseVersion excludeAll ExclusionRule(organization="org.mortbay.jetty")
 
+//paypal libraries
+libraryDependencies ++= Seq(
+  "com.paypal.infra" % "infra-core" % "13.4.3",
+  "com.paypal.risk.idi" % "common-vo" % "2.91" exclude("com.paypal.infra", "infra")
+)
+
+
 // Use local repositories by default
 resolvers ++= Seq(
   Resolver.defaultLocal,
@@ -34,7 +41,7 @@ resolvers ++= Seq(
 
 test in assembly := {}
 
-assemblyJarName in assembly := "KafkaApiComparison.jar"
+assemblyJarName in assembly := s"${name.value}_assembly_${scalaVersion.value}-${version.value}.jar"
 
 assemblyMergeStrategy in assembly := {
   //  case PathList("org", "spark", xs @ _*) => MergeStrategy.last
@@ -52,4 +59,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-mainClass in assembly := Some("priv.Luminosite.KafkaCompare.KafkaCompareMain")
+mainClass in assembly := Some("com.paypal.risk.rds.KafkaStreamExample.KafkaStreamExampleMain")
