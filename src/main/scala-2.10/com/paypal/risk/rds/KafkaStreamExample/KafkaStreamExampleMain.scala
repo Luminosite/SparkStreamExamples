@@ -3,7 +3,7 @@ package com.paypal.risk.rds.KafkaStreamExample
 import java.io.{File, FileInputStream}
 import java.util.Properties
 
-import com.paypal.risk.rds.HBase.util.{HBaseConnection, HTableConnectionDemo}
+import com.paypal.risk.rds.HBase.util.{HBaseOperator, HBaseConnection, HTableConnectionDemo}
 import com.paypal.risk.rds.KafkaStreamExample.constant.KafkaConstant
 
 /**
@@ -24,7 +24,13 @@ object KafkaStreamExampleMain {
       case "-kafkaAPI--Receiver"::tail =>
         nextOption(map ++ Map('kafkaAPI -> KafkaStreamExample.ReceiverBasedApproach), tail)
 
+      case "-c"::tail => nextOption(map ++ Map('clean -> "value"), tail)
+
       case "-hbaseOps"::value::tail => nextOption(map ++ Map('hbaseOps -> value), tail)
+
+      case "-interval"::value::tail => nextOption(map ++ Map('interval -> value.toInt), tail)
+
+      case "-period"::value::tail => nextOption(map ++ Map('period -> value.toInt), tail)
 
       case option :: tail => println("Unknown opton:"+option)
         map
@@ -45,6 +51,16 @@ object KafkaStreamExampleMain {
 
     if(ops.get('hbaseOps).isEmpty){
       println("Error: HBase configuration hasn't been set!")
+      return false
+    }
+
+    if(ops.get('interval).isEmpty){
+      println("Error: Interval configuration hasn't been set!")
+      return false
+    }
+
+    if(ops.get('period).isEmpty){
+      println("Error: Period configuration hasn't been set!")
       return false
     }
 
@@ -73,6 +89,15 @@ object KafkaStreamExampleMain {
         if(!opsCheck(ops)){
           return
         }
+
+        if(ops.get('clean).nonEmpty){
+
+          val ho = new HBaseOperator(hbaseProperties)
+          ho.clean()
+          ho.close()
+          return
+        }
+
         //load kafka configuration
         val input = new FileInputStream(ops.get('kafkaOps).get.toString)
         properties.load(input)
@@ -85,10 +110,13 @@ object KafkaStreamExampleMain {
         val hbaseConfigInput = new FileInputStream(ops.get('hbaseOps).get.toString)
         hbaseProperties.load(hbaseConfigInput)
 
-        val demo = new HTableConnectionDemo(hbaseProperties)
-        demo.run()
+        val interval = ops.get('interval).get.asInstanceOf[Int]
+        val period = ops.get('period).get.asInstanceOf[Int]
 
-//        new KafkaStreamExample().run(kafkaApproach, properties)
+//        val demo = new HTableConnectionDemo(hbaseProperties)
+//        demo.run()
+
+        new KafkaStreamExample().run(kafkaApproach, properties, hbaseProperties, interval, period)
       }else{
         println("Some configuration is not correct")
       }

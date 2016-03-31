@@ -1,0 +1,79 @@
+----- rdd -----
+[Stage 0:==>                                                       (1 + 2) / 25][uKernelCore Logger] System property 'com.paypal.config.root' = null
+[uKernelCore Logger] File does NOT exist = null/config/ukernelcore/logging.properties
+	Using resources to locate config/ukernelcore/logging.properties
+Found config file at jar:file:/x/home/kufu/projects/KafkaStreamDemo/bin/SparkStreamExamples_assembly_2.10.6-1.0.jar!/config/ukernelcore/logging.properties
+[Stage 0:====================================================>    (23 + 2) / 25](idibeaconeventservice, 174
+(User_NewAccountCreated, 11
+(HeadlessBeacon, 1776
+(idibankaccountaddeventservice, 2
+(User_LoginSucceeded, 342
+(idicreditcardchange2eventservice, 28
+(EmailChanged, 20
+(User_LoginFailed, 442
+(User_LoggedOut, 52
+(AddressChanged, 41
+(idicreditcardcreate2eventservice, 22
+(withdrawalpostprocessmessagev2eventservice, 26
+(PhoneChanged, 25
+(idibankaccountchangeeventservice, 1
+----- rdd -----
+[Stage 2:====================================================>    (23 + 2) / 25](idibeaconeventservice, 622
+(User_NewAccountCreated, 56
+(HeadlessBeacon, 5832
+(idibankaccountaddeventservice, 9
+(User_LoginSucceeded, 1135
+(idicreditcardchange2eventservice, 75
+(EmailChanged, 76
+(User_LoginFailed, 1509
+(User_LoggedOut, 167
+(AddressChanged, 166
+(idicreditcardcreate2eventservice, 57
+(withdrawalpostprocessmessagev2eventservice, 84
+(PhoneChanged, 60
+(idibankaccountchangeeventservice, 8
+----- rdd -----
+[Stage 4:======================================================>  (24 + 1) / 25](idibeaconeventservice, 751
+(User_NewAccountCreated, 48
+(HeadlessBeacon, 5762
+(idibankaccountaddeventservice, 6
+(User_LoginSucceeded, 1156
+(idicreditcardchange2eventservice, 74
+(EmailChanged, 74
+(User_LoginFailed, 1623
+(User_LoggedOut, 147
+(AddressChanged, 137
+(idicreditcardcreate2eventservice, 67
+(withdrawalpostprocessmessagev2eventservice, 56
+(PhoneChanged, 58
+(idibankaccountchangeeventservice, 4
+----- rdd -----
+[Stage 6:====================================================>    (23 + 2) / 25](idibeaconeventservice, 658
+(User_NewAccountCreated, 60
+(HeadlessBeacon, 5839
+(idibankaccountaddeventservice, 6
+(User_LoginSucceeded, 1108
+(idicreditcardchange2eventservice, 82
+(EmailChanged, 86
+(User_LoginFailed, 1666
+(User_LoggedOut, 136
+(AddressChanged, 182
+(idicreditcardcreate2eventservice, 68
+(withdrawalpostprocessmessagev2eventservice, 58
+(PhoneChanged, 79
+(idibankaccountchangeeventservice, 3
+----- rdd -----
+[Stage 8:====================================================>    (23 + 2) / 25](idibeaconeventservice, 649
+(User_NewAccountCreated, 52
+(HeadlessBeacon, 5825
+(idibankaccountaddeventservice, 3
+(User_LoginSucceeded, 1122
+(idicreditcardchange2eventservice, 59
+(EmailChanged, 81
+(User_LoginFailed, 1651
+(User_LoggedOut, 130
+(AddressChanged, 158
+(idicreditcardcreate2eventservice, 53
+(withdrawalpostprocessmessagev2eventservice, 96
+(PhoneChanged, 54
+(idibankaccountchangeeventservice, 5

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+readonly _sbin="$( cd "$( dirname $0 )" && pwd )"
+readonly root_dir=`dirname ${_sbin}`
+
+submit_job() {
+	local queue=$1; shift;
+	${submit} \
+	--master local[2] \
+	--class com.paypal.risk.rds.KafkaStreamExample.KafkaStreamExampleMain \
+	$root_dir/bin/${jars} \
+	-kafkaOps $root_dir/conf/horton-input-kafka.conf \
+	-kafkaAPI--Direct
+}
+
+horton_job_submit() {
+	submit_job "${HORTON_QUEUE}"
+}

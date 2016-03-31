@@ -1,6 +1,7 @@
 /checkpoint
 .history
 /target
-/project
+/project/project
+/project/target
 /.idea
 /programMonitor/nohup.out

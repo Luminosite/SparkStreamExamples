@@ -17,8 +17,8 @@ object HTableFactory {
     val table = connection.getTable(tableName)
 
     def tableClose(): Unit = {
+      table.close()
       connection.close()
-      println("connection closed")
     }
 
     (table, tableClose)

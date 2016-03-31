@@ -26,6 +26,14 @@ case class HTableData(row:Array[Byte],
     }
   }
 
+  def getLongValue():Long = {
+    if (value.length == 8) {
+      Bytes.toLong(value)
+    } else {
+      0l
+    }
+  }
+
 }
 
 object HTableData{

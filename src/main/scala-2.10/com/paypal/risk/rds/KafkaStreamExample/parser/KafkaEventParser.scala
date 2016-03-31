@@ -30,7 +30,7 @@ object KafkaEventParser{
     msg.startsWith("topic://default.User_LoginSucceeded")
 
   def isInterestingMessage(msg: String): Boolean = {
-    isNewAccountCreatedMessage(msg) ||
+//    isNewAccountCreatedMessage(msg) ||
       isAccountSuccessLoginMessage(msg)
   }
 

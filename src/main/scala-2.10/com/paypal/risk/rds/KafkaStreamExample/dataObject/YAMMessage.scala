@@ -36,7 +36,7 @@ case class YAMMessage(jMSQueueName: String, jMSMessageName: String, messageName:
 }
 
 object YAMMessage {
-  def fromString(msg: String, delimiter: Char = '\u0010', deserialize: Boolean = true): YAMMessage = {
+  def fromString(msg: String, delimiter: Char = '\u0010'): YAMMessage = {
     val a = msg.split(delimiter)
 
     if (a.length != 12)
@@ -44,7 +44,7 @@ object YAMMessage {
 
     val voStr = a(11)
 
-    if (deserialize) {
+    try{
       val deser = new UniversalDeserializer()
       val payload =
         if (voStr.startsWith("U30300"))
@@ -54,9 +54,10 @@ object YAMMessage {
         else
           throw new RuntimeException(s"Payload cannot be parsed: $voStr")
       val vo = deser.deserialize(new ByteArrayInputStream(payload.getBytes))
+
       YAMMessage(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), vo)
-    } else {
-      YAMMessage(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), voStr.substring(6))
+    }catch {
+      case e:Throwable => YAMMessage(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), voStr.substring(6))
     }
 
   }
