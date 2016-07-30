@@ -11,3 +11,7 @@ links:
 ##notes:
 
 ATO & Sybil detecting
+
+PIT Tagging
+  tagging in accountAttr
+  logic is in sql in *Tag function
